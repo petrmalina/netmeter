@@ -1,0 +1,23 @@
+[Unit]
+Description=NetMeter — Internet Speed Monitor
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/docker pull ghcr.io/petrmalina/netmeter:latest
+ExecStart=/usr/bin/docker run --rm --name netmeter \
+    --network host \
+    --env-file /etc/netmeter/env \
+    -v netmeter-data:/app/data \
+    -v netmeter-output:/app/output \
+    ghcr.io/petrmalina/netmeter:latest
+ExecStop=/usr/bin/docker stop netmeter
+Restart=on-failure
+RestartSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
