@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "netmeter"
-version = "1.0.0"
+version = "1.1.0"
 description = "Automated internet speed monitoring with per-network tracking and dashboard."
 readme = "README.md"
 license = {text = "MIT"}
