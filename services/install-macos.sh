@@ -6,6 +6,8 @@ IMAGE="ghcr.io/petrmalina/netmeter:latest"
 CONTAINER_NAME="netmeter"
 PLIST_NAME="com.netmeter"
 PLIST_DEST="${HOME}/Library/LaunchAgents/${PLIST_NAME}.plist"
+CONFIG_DIR="${HOME}/.config/netmeter"
+ENV_FILE="${CONFIG_DIR}/env"
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BOLD='\033[1m'; NC='\033[0m'
 ok()   { echo -e "${GREEN}✓${NC} $*"; }
@@ -89,6 +91,24 @@ install_service() {
     local docker_path
     docker_path=$(command -v docker)
 
+    mkdir -p "${CONFIG_DIR}"
+    if [[ ! -f "${ENV_FILE}" ]]; then
+        local script_dir
+        script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+        if [[ -f "${script_dir}/../.env.example" ]]; then
+            cp "${script_dir}/../.env.example" "${ENV_FILE}"
+        else
+            cat > "${ENV_FILE}" <<'ENVFILE'
+NETMETER_INTERVAL=600
+NETMETER_LOG_LEVEL=INFO
+NETMETER_DASHBOARD_PORT=9280
+ENVFILE
+        fi
+        ok "Config created at ${ENV_FILE} — edit as needed."
+    else
+        ok "Config exists at ${ENV_FILE}."
+    fi
+
     mkdir -p "$(dirname "${PLIST_DEST}")"
     cat > "${PLIST_DEST}" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -105,8 +125,10 @@ install_service() {
         <string>--rm</string>
         <string>--name</string>
         <string>${CONTAINER_NAME}</string>
-        <string>--network</string>
-        <string>host</string>
+        <string>-p</string>
+        <string>9280:9280</string>
+        <string>--env-file</string>
+        <string>${ENV_FILE}</string>
         <string>-v</string>
         <string>netmeter-data:/app/data</string>
         <string>-v</string>
@@ -134,6 +156,7 @@ PLIST
 
     echo ""
     echo -e "  ${BOLD}Dashboard${NC}  http://localhost:9280"
+    echo -e "  ${BOLD}Config${NC}     ${ENV_FILE}"
     echo -e "  ${BOLD}Logs${NC}       docker logs -f ${CONTAINER_NAME}"
     echo -e "  ${BOLD}Update${NC}     docker pull ${IMAGE} && launchctl unload ${PLIST_DEST} && launchctl load ${PLIST_DEST}"
     echo -e "  ${BOLD}Uninstall${NC}  bash $0 uninstall"
@@ -159,9 +182,10 @@ uninstall_service() {
     fi
 
     echo ""
-    warn "Data volumes were kept."
-    info "Remove data:  docker volume rm netmeter-data netmeter-output"
-    info "Remove image: docker rmi ${IMAGE}"
+    warn "Data volumes and config were kept."
+    info "Remove data:   docker volume rm netmeter-data netmeter-output"
+    info "Remove config: rm -rf ${CONFIG_DIR}"
+    info "Remove image:  docker rmi ${IMAGE}"
     ok "Done."
 }
 
