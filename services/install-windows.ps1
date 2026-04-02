@@ -25,6 +25,8 @@ $Image = "ghcr.io/petrmalina/netmeter:latest"
 $ContainerName = "netmeter"
 $RepoUrl = "https://github.com/petrmalina/netmeter"
 $PackageUrl = "$RepoUrl/pkgs/container/netmeter"
+$ConfigDir = Join-Path $env:APPDATA "netmeter"
+$EnvFile = Join-Path $ConfigDir "env"
 
 function Write-OK   { param($Msg) Write-Host "  OK " -ForegroundColor Green -NoNewline; Write-Host $Msg }
 function Write-Err  { param($Msg) Write-Host "  ERR " -ForegroundColor Red -NoNewline; Write-Host $Msg }
@@ -72,12 +74,6 @@ function Test-Preflight {
 
     if ($failed) { return $false }
 
-    $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-    if (-not $isAdmin) {
-        Write-Warn "Not running as Administrator — this may cause issues with host networking."
-        Write-Info "Re-run: powershell -ExecutionPolicy Bypass -RunAs -File $($MyInvocation.ScriptName) $Action"
-    }
-
     return $true
 }
 
@@ -117,10 +113,31 @@ function Install-NetMeter {
         docker rm -f $ContainerName | Out-Null
     }
 
+    if (-not (Test-Path $ConfigDir)) {
+        New-Item -ItemType Directory -Path $ConfigDir -Force | Out-Null
+    }
+    if (-not (Test-Path $EnvFile)) {
+        $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+        $exampleEnv = Join-Path (Split-Path -Parent $scriptDir) ".env.example"
+        if (Test-Path $exampleEnv) {
+            Copy-Item $exampleEnv $EnvFile
+        } else {
+            @"
+NETMETER_INTERVAL=600
+NETMETER_LOG_LEVEL=INFO
+NETMETER_DASHBOARD_PORT=9280
+"@ | Set-Content $EnvFile -Encoding UTF8
+        }
+        Write-OK "Config created at $EnvFile — edit as needed."
+    } else {
+        Write-OK "Config exists at $EnvFile."
+    }
+
     $runOutput = docker run -d `
         --name $ContainerName `
         --restart unless-stopped `
-        --network host `
+        -p 9280:9280 `
+        --env-file $EnvFile `
         -v netmeter-data:/app/data `
         -v netmeter-output:/app/output `
         $Image 2>&1
@@ -128,7 +145,7 @@ function Install-NetMeter {
     if ($LASTEXITCODE -ne 0) {
         Write-Err "Failed to start container."
         Write-Info "Docker output: $runOutput"
-        Write-Info "Try running manually: docker run --rm --network host $Image"
+        Write-Info "Try running manually: docker run --rm -p 9280:9280 $Image"
         exit 1
     }
 
@@ -143,6 +160,7 @@ function Install-NetMeter {
 
     Write-Host ""
     Write-Host "  Dashboard  http://localhost:9280"
+    Write-Host "  Config     $EnvFile"
     Write-Host "  Logs       docker logs -f $ContainerName"
     Write-Host "  Update     docker pull $Image; docker restart $ContainerName"
     Write-Host "  Uninstall  powershell -File $($MyInvocation.MyCommand.Path) uninstall"
@@ -168,9 +186,10 @@ function Uninstall-NetMeter {
     }
 
     Write-Host ""
-    Write-Warn "Data volumes were kept."
-    Write-Info "Remove data:  docker volume rm netmeter-data netmeter-output"
-    Write-Info "Remove image: docker rmi $Image"
+    Write-Warn "Data volumes and config were kept."
+    Write-Info "Remove data:   docker volume rm netmeter-data netmeter-output"
+    Write-Info "Remove config: Remove-Item -Recurse $ConfigDir"
+    Write-Info "Remove image:  docker rmi $Image"
     Write-OK "Done."
 }
 
