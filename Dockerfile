@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS builder
+FROM python:3.14-slim AS builder
 
 WORKDIR /build
 COPY requirements.txt pyproject.toml ./
@@ -6,7 +6,7 @@ COPY src/ src/
 RUN pip install --no-cache-dir --prefix=/install -r requirements.txt . \
     && find /install -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 LABEL org.opencontainers.image.title="NetMeter" \
       org.opencontainers.image.description="Automated internet speed monitoring with per-network tracking and dashboard" \
