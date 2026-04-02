@@ -50,25 +50,23 @@ jobs:
       - name: Append Docker instructions to release notes
         run: |
           version="${{ steps.version.outputs.version }}"
-          cat >> /tmp/release-notes.md <<EOF
-
----
-
-### 🐳 Docker
-
-\`\`\`bash
-docker pull ghcr.io/petrmalina/netmeter:${version}
-\`\`\`
-
-Or use the attached \`docker-compose.yml\`:
-
-\`\`\`bash
-curl -LO https://github.com/petrmalina/netmeter/releases/download/v${version}/docker-compose.yml
-docker compose up -d
-\`\`\`
-
-[View on GitHub Container Registry](https://github.com/petrmalina/netmeter/pkgs/container/netmeter)
-EOF
+          {
+            echo ""
+            echo "---"
+            echo ""
+            echo "### Docker"
+            echo ""
+            echo "Pull the image:"
+            echo ""
+            echo "    docker pull ghcr.io/petrmalina/netmeter:${version}"
+            echo ""
+            echo "Or download the attached docker-compose.yml and run:"
+            echo ""
+            echo "    curl -LO https://github.com/petrmalina/netmeter/releases/download/v${version}/docker-compose.yml"
+            echo "    docker compose up -d"
+            echo ""
+            echo "[View on GitHub Container Registry](https://github.com/petrmalina/netmeter/pkgs/container/netmeter)"
+          } >> /tmp/release-notes.md
 
       - name: Create tag and GitHub Release
         env:
