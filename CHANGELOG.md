@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.0] — 2026-04-02
 
+### Fixed (post-release)
+
+- Release workflow using `--notes-file` instead of inline `--notes` to handle backticks and special characters in changelog
+
 ### Added
 
 - Auto-detect WiFi and Ethernet inside Docker via `iwgetid` and `/sys/class/net`

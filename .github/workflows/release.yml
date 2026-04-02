@@ -31,28 +31,21 @@ jobs:
           fi
 
       - name: Extract changelog for this version
-        id: changelog
         run: |
           version="${{ steps.version.outputs.version }}"
-          body=$(awk -v ver="$version" '
+          awk -v ver="$version" '
             /^## \[/ {
               if (found) exit
               if (index($0, "[" ver "]")) found=1
               next
             }
             found { print }
-          ' CHANGELOG.md)
+          ' CHANGELOG.md > /tmp/release-notes.md
 
-          if [ -z "$body" ]; then
+          if [ ! -s /tmp/release-notes.md ]; then
             echo "::error::No changelog entry found for version $version"
             exit 1
           fi
-
-          {
-            echo "body<<CHANGELOG_EOF"
-            echo "$body"
-            echo "CHANGELOG_EOF"
-          } >> "$GITHUB_OUTPUT"
 
       - name: Create tag and GitHub Release
         env:
@@ -60,5 +53,5 @@ jobs:
         run: |
           gh release create "${{ steps.version.outputs.tag }}" \
             --title "NetMeter ${{ steps.version.outputs.version }}" \
-            --notes "${{ steps.changelog.outputs.body }}" \
+            --notes-file /tmp/release-notes.md \
             --target main
