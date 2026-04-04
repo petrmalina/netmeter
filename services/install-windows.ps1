@@ -123,7 +123,7 @@ function Install-NetMeter {
             Copy-Item $exampleEnv $EnvFile
         } else {
             @"
-NETMETER_INTERVAL=600
+NETMETER_INTERVAL=300
 NETMETER_LOG_LEVEL=INFO
 NETMETER_DASHBOARD_PORT=9280
 "@ | Set-Content $EnvFile -Encoding UTF8

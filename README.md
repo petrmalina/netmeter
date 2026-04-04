@@ -81,7 +81,7 @@ All settings via environment variables (see [`.env.example`](.env.example)):
 
 | Variable | Default | Description |
 |---|---|---|
-| `NETMETER_INTERVAL` | `600` | Measurement interval (seconds) |
+| `NETMETER_INTERVAL` | `300` | Measurement interval (seconds) |
 | `NETMETER_RETRIES` | `3` | Retry attempts on failure |
 | `NETMETER_RETRY_DELAY` | `15` | Delay between retries (seconds) |
 | `NETMETER_LOG_LEVEL` | `INFO` | Log level |

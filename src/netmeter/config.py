@@ -13,7 +13,7 @@ DB_PATH = DB_DIR / os.environ.get("NETMETER_DB_NAME", "speedtest.db")
 
 OUTPUT_DIR = Path(os.environ.get("NETMETER_OUTPUT_DIR", BASE_DIR / "output"))
 
-MEASURE_INTERVAL_SECONDS = int(os.environ.get("NETMETER_INTERVAL", "600"))
+MEASURE_INTERVAL_SECONDS = int(os.environ.get("NETMETER_INTERVAL", "300"))
 MEASURE_RETRIES = int(os.environ.get("NETMETER_RETRIES", "3"))
 MEASURE_RETRY_DELAY = int(os.environ.get("NETMETER_RETRY_DELAY", "15"))
 

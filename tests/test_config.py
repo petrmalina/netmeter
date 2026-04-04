@@ -13,7 +13,7 @@ def test_default_config_values():
 
         importlib.reload(cfg)
 
-        assert cfg.MEASURE_INTERVAL_SECONDS == 600
+        assert cfg.MEASURE_INTERVAL_SECONDS == 300
         assert cfg.MEASURE_RETRIES == 3
         assert cfg.MEASURE_RETRY_DELAY == 15
         assert cfg.LOG_LEVEL == "INFO"
