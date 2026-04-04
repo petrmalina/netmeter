@@ -99,7 +99,7 @@ install_service() {
             cp "${script_dir}/../.env.example" "${ENV_FILE}"
         else
             cat > "${ENV_FILE}" <<'ENVFILE'
-NETMETER_INTERVAL=600
+NETMETER_INTERVAL=300
 NETMETER_LOG_LEVEL=INFO
 NETMETER_DASHBOARD_PORT=9280
 ENVFILE

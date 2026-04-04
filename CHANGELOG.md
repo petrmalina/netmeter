@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docker pull instructions appended to GitHub Release notes automatically
 - `docker-compose.yml` attached as a downloadable release asset
 
+### Changed
+
+- Default measurement interval from 10 minutes (600s) to 5 minutes (300s)
+
 ## [1.1.0] — 2026-04-02
 
 ### Fixed (post-release)
