@@ -20,7 +20,7 @@ jobs:
     name: Build & Push
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
@@ -65,7 +65,7 @@ jobs:
     needs: build
     if: github.event_name != 'pull_request'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Build image for scanning
         run: docker build -t netmeter:scan .
       - name: Run Trivy
