@@ -69,7 +69,7 @@ jobs:
       - name: Build image for scanning
         run: docker build -t netmeter:scan .
       - name: Run Trivy
-        uses: aquasecurity/trivy-action@v0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: netmeter:scan
           format: table
